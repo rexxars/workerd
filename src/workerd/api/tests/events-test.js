@@ -463,3 +463,17 @@ export const handlerThis = {
     strictEqual(handlerObject.handleEvent.mock.callCount(), 1);
   },
 };
+
+export const messageEventOrigin = {
+  test() {
+    // Per the spec, MessageEventInit's `origin` member is a USVString defaulting to the empty
+    // string, so `origin` is never null. Without the
+    // message_event_origin_defaults_to_empty_string compat flag we report null when there is no
+    // URL to derive an origin from.
+    const specCompliant =
+      Cloudflare.compatibilityFlags
+        .message_event_origin_defaults_to_empty_string;
+    const event = new MessageEvent('message', { data: null });
+    strictEqual(event.origin, specCompliant ? '' : null);
+  },
+};

@@ -1673,4 +1673,22 @@ struct CompatibilityFlags @0x8f8c1b68151b6cef {
   # the global object, which is a breaking change in its own right. That is left for a separate
   # change; the lookup is skipped for any type that does have an event handler attribute, so such
   # a change can be made incrementally without double-firing handlers.
+
+  messageEventOriginDefaultsToEmptyString @187 :Bool
+      $compatEnableFlag("message_event_origin_defaults_to_empty_string")
+      $compatDisableFlag("no_message_event_origin_defaults_to_empty_string");
+  # Makes `MessageEvent.origin` report the empty string, rather than null, when we have no origin
+  # to report.
+  #
+  # A MessageEvent's origin is internally nullable, and the standard's getter returns the empty
+  # string for the null case:
+  # https://html.spec.whatwg.org/multipage/comms.html#dom-messageevent-origin
+  # (`MessageEventInit`'s `""` default for the member is a separate supporting rule.) We returned
+  # null instead, which is observable wherever we have no origin: `EventSource` is the only thing
+  # that supplies one today, so every `MessageEvent` dispatched for a `WebSocket` or
+  # `MessagePort` message reported null.
+  #
+  # Scope: this only changes the value reported for the absent case. It does NOT make
+  # URL-backed `WebSocket`s report the origin of their URL, which the WebSocket standard
+  # requires and which we still do not do. See the TODO in web-socket.c++.
 }

@@ -1353,6 +1353,11 @@ kj::Promise<kj::Maybe<kj::Exception>> LegacyWebSocketAdapter::readLoop(
         // Emit the mark here, in-scope, so it isn't dropped for want of a perf-counter monitor
         // scope. The limiter stamps the time (dispatch time, ~= receive time).
         markWebSocketPerfEvent("ws_received"_kjc);
+        // TODO(soon): The WebSocket standard says the message event's origin is the serialized
+        // origin of the WebSocket's URL, so a `new WebSocket(url)` should report that rather than
+        // the empty string. We supply no origin here, which is right for a WebSocketPair (no URL)
+        // but wrong for a URL-backed socket. Doing that properly is a separate observable change
+        // and needs its own compat flag; see messageEventOriginDefaultsToEmptyString.
         KJ_SWITCH_ONEOF(message) {
           KJ_CASE_ONEOF(text, kj::String) {
             shell.dispatchEventImpl(js, js.alloc<MessageEvent>(js, js.str(text)));
