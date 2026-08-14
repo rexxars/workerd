@@ -1691,4 +1691,17 @@ struct CompatibilityFlags @0x8f8c1b68151b6cef {
   # Scope: this only changes the value reported for the absent case. It does NOT make
   # URL-backed `WebSocket`s report the origin of their URL, which the WebSocket standard
   # requires and which we still do not do. See the TODO in web-socket.c++.
+
+  specCompliantEventIsTrusted @188 :Bool
+      $compatEnableFlag("spec_compliant_event_is_trusted")
+      $compatDisableFlag("no_spec_compliant_event_is_trusted");
+  # Makes `isTrusted` false on events constructed from JavaScript.
+  #
+  # Per the DOM standard, an event's "is trusted" flag is only set when the runtime itself
+  # creates and dispatches the event; anything constructed from JS is untrusted. `new Event()`
+  # already got this right, but `MessageEvent`, `CustomEvent`, `ErrorEvent` and `CloseEvent`
+  # share their C++ constructors with internal callers that legitimately produce trusted
+  # events, and so reported `isTrusted: true` when constructed from JS.
+  #
+  # Events the runtime creates are unaffected and remain trusted.
 }

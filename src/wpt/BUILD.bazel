@@ -54,6 +54,7 @@ wpt_test(
     name = "dom/events",
     compat_flags = [
         "spec_compliant_event_handler_attributes",
+        "spec_compliant_event_is_trusted",
     ],
     config = "dom/events-test.ts",
     wpt_directory = "@wpt//:dom/events@module",

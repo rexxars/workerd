@@ -477,3 +477,24 @@ export const messageEventOrigin = {
     strictEqual(event.origin, specCompliant ? '' : null);
   },
 };
+
+export const eventIsTrusted = {
+  test() {
+    // Per the standard, an event's "is trusted" flag is only set when the runtime creates and
+    // dispatches the event, so anything constructed here is untrusted. Without the
+    // spec_compliant_event_is_trusted compat flag, only the base Event got this right.
+    const specCompliant =
+      Cloudflare.compatibilityFlags.spec_compliant_event_is_trusted;
+
+    strictEqual(new Event('foo').isTrusted, false);
+
+    for (const event of [
+      new MessageEvent('message', { data: null }),
+      new CustomEvent('foo'),
+      new ErrorEvent('error'),
+      new CloseEvent('close'),
+    ]) {
+      strictEqual(event.isTrusted, specCompliant ? false : true, event.type);
+    }
+  },
+};

@@ -172,6 +172,14 @@ jsg::Ref<Event> Event::constructor(jsg::Lock& js, kj::String type, jsg::Optional
   return js.alloc<Event>(kj::mv(type), init.orDefault(defaultInit), Trusted::NO);
 }
 
+void Event::markConstructedFromJs(jsg::Lock& js) {
+  KJ_IF_SOME(flags, FeatureFlags::tryGet(js)) {
+    if (flags.getSpecCompliantEventIsTrusted()) {
+      this->flags.trusted = false;
+    }
+  }
+}
+
 kj::StringPtr Event::getType() {
   return type;
 }
@@ -1144,7 +1152,9 @@ CustomEvent::CustomEvent(kj::String ownType, CustomEventInit init)
 
 jsg::Ref<CustomEvent> CustomEvent::constructor(
     jsg::Lock& js, kj::String type, jsg::Optional<CustomEventInit> init) {
-  return js.alloc<CustomEvent>(kj::mv(type), kj::mv(init).orDefault({}));
+  auto event = js.alloc<CustomEvent>(kj::mv(type), kj::mv(init).orDefault({}));
+  event->markConstructedFromJs(js);
+  return event;
 }
 
 jsg::Optional<jsg::JsValue> CustomEvent::getDetail(jsg::Lock& js) {
